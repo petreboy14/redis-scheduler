@@ -1,7 +1,7 @@
 redis-scheduler
 ===============
 
-Use redis keyspace notifications to trigger timed events. Multiple handlers can be set up per events. 
+Use redis keyspace notifications to trigger timed events. Multiple handlers can be set up per events and events can be rescheduled and cancelled. 
 
 ## Requirements
 * Redis 2.8.0 or higher.
