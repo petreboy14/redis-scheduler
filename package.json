@@ -1,6 +1,6 @@
 {
   "name": "redis-scheduler",
-  "version": "0.0.1",
+  "version": "0.8.1",
   "description": "Use redis keyspace notifications to trigger timed events",
   "main": "index.js",
   "scripts": {
@@ -30,5 +30,8 @@
     "lab": "^3.2.1",
     "precommit-hook": "^1.0.2",
     "should": "^4.0.4"
+  },
+  "optionalDependencies": {
+    "hiredis": "^0.1.17"
   }
 }
