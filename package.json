@@ -4,7 +4,7 @@
   "description": "Use redis keyspace notifications to trigger timed events",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/lab/bin/lab test"
+    "test": "./node_modules/lab/bin/lab -c -l test"
   },
   "repository": {
     "type": "git",
@@ -28,6 +28,7 @@
   "devDependencies": {
     "jshint": "^2.5.1",
     "lab": "^3.2.1",
-    "precommit-hook": "^1.0.2"
+    "precommit-hook": "^1.0.2",
+    "should": "^4.0.4"
   }
 }

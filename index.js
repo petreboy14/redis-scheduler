@@ -21,8 +21,7 @@ util.inherits(Scheduler, events.EventEmitter);
 
 Scheduler.prototype.setRedisEvents = function () {
   var self = this;
-  this.clients.listener.removeAllListeners();
-  this.clients.scheduler.removeAllListeners();
+  this.cleanup();
 
   this.clients.listener.on('ready', function () {
     self.emit('ready', 'listener');
@@ -30,42 +29,51 @@ Scheduler.prototype.setRedisEvents = function () {
   this.clients.listener.on('connect', function () {
     self.emit('connect', 'listener');
   });
-  this.clients.listener.on('error', function (err) {
-    console.log(err);
-    self.emit('error', err, 'listener');
-  });
-  this.clients.listener.on('end', function () {
-    console.log('end');
-    self.emit('end', 'listener');
-  });
   this.clients.listener.on('drain', function () {
-    console.log('drain');
     self.emit('drain', 'listener');
   });
   this.clients.listener.on('idle', function () {
     self.emit('idle', 'listener');
   });
+  this.clients.scheduler.on('ready', function () {
+    self.emit('ready', 'scheduler');
+  });
+  this.clients.scheduler.on('connect', function () {
+    self.emit('connect', 'scheduler');
+  });
+  this.clients.scheduler.on('drain', function () {
+    self.emit('drain', 'scheduler');
+  });
+  this.clients.scheduler.on('idle', function () {
+    self.emit('idle', 'scheduler');
+  });
 
   this.clients.listener.on('message', function (channel, message) {
-    if (channel === '__keyevent@0__:expired') {
-      self.handleExpireEvent(message);
-    }
+    self.handleExpireEvent(message);
   });
 
   this.clients.listener.subscribe('__keyevent@0__:expired');
 };
 
 Scheduler.prototype.schedule = function (key, expire, handler, cb) {
-  if (handler && !this.handlers.hasOwnProperty(key)) {
-    this.handlers[key] = [];
+  if (handler) {
+    if (!this.handlers.hasOwnProperty(key)) {
+      this.handlers[key] = [];
+    }
+    this.handlers[key].push(handler);
   }
-  this.handlers[key].push(handler);
 
-  this.clients.scheduler.set(key, '', 'PX', expire, cb);
+  if (expire) {
+    this.clients.scheduler.set(key, '', 'PX', expire, cb);
+  }
 };
 
 Scheduler.prototype.reschedule = function (key, expire, cb) {
   this.schedule(key, expire, null, cb);
+};
+
+Scheduler.prototype.addHandler = function (key, handler) {
+  this.schedule(key, null, handler);
 };
 
 Scheduler.prototype.cancel = function (key, cb) {
@@ -79,9 +87,23 @@ Scheduler.prototype.cancel = function (key, cb) {
 Scheduler.prototype.handleExpireEvent = function (key) {
   if (this.handlers.hasOwnProperty(key)) {
     this.handlers[key].forEach(function (handler) {
-      handler(key);
+      handler(null, key);
     });
   }
+};
+
+Scheduler.prototype.end = function () {
+  this.cleanup();
+  this.clients.listener.end();
+  this.clients.scheduler.end();
+};
+
+Scheduler.prototype.cleanup = function () {
+  this.clients.listener.removeAllListeners();
+  this.clients.scheduler.removeAllListeners();
+
+  this.clients.listener.unsubscribe('__keyevent@0__:expired');
+  this.handlers = [];
 };
 
 module.exports = Scheduler;
