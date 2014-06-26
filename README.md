@@ -1,7 +1,7 @@
 redis-scheduler
 ===============
 
-Use redis keyspace notifications to trigger timed events.
+Use redis keyspace notifications to trigger timed events. Multiple handlers can be set up per events. 
 
 ## Requirements
 * Redis 2.8.0 or higher.
@@ -46,10 +46,50 @@ scheduler.schedule('test-key', expirationTime, eventTriggered, function (err) {
 ```
 
 **#schedule(key, expiration, triggerFn, cb)**
-* key - The key (or name) of event to store
+* key - The key of event to store
 * expiration - Number of milliseconds until expiration
 * triggerFn - Function to call when scheduled time occurs
 * cb - Function to call after schedule set
+
+### Adding event handler
+
+You can add multiple handlers per event.
+
+```
+scheduler.addHandler('test-key', function () {
+  console.log('another event');
+});
+```
+
+**#addHandler(key, fn)**
+* key - The event key to add the handler for
+* fn - The extra handler to add when the event is triggered
+
+###Rescheduling an Event###
+
+Reschedules a scheduled event. Will take either a new date to trigger or explicit milliseconds. 
+
+```
+scheduler.reschedule('test-key', 3000, function () {
+  console.log('rescheduled');
+});
+```
+
+**#reschedule(key, expiration, cb)**
+* key - Event to reschedule
+* expiration - Milliseconds to reset expiration to
+* cb - Function to call after rescheduling is complete
+
+###Cancel scheduled item###
+
+Cancels a scheduled event and cleans up handlers
+
+```
+scheduler.cancel('test-key');
+```
+
+**#cancel(key)**
+* key - Key to remove event for
 
 ## Testing
 
