@@ -42,6 +42,18 @@ describe('Scheduler tests', function () {
     });
   });
 
+  it('should be able to schedule an event with a date receive notification of it', function (done) {
+    var scheduler = new Scheduler({ host: 'localhost', port: 6379});
+    var d = new Date();
+    d.setSeconds(d.getSeconds() + 1);
+    scheduler.schedule('test-job', d, function (err, message) {
+      should.not.exist(err);
+      message.should.equal('test-job');
+      scheduler.end();
+      done();
+    });
+  });
+
   it('should be able to handle a reschedule of an event', function (done) {
     var client = redis.createClient();
     var timeout = setTimeout(function () {

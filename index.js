@@ -64,7 +64,7 @@ Scheduler.prototype.schedule = function (key, expire, handler, cb) {
   }
 
   if (expire) {
-    this.clients.scheduler.set(key, '', 'PX', expire, cb);
+    this.clients.scheduler.set(key, '', 'PX', this.getMillis(expire), cb);
   }
 };
 
@@ -96,6 +96,15 @@ Scheduler.prototype.end = function () {
   this.cleanup();
   this.clients.listener.end();
   this.clients.scheduler.end();
+};
+
+Scheduler.prototype.getMillis = function (expiration) {
+  if (expiration instanceof Date) {
+    var now = new Date().getTime();
+    expiration = expiration.getTime() - now;
+  }
+
+  return expiration;
 };
 
 Scheduler.prototype.cleanup = function () {
