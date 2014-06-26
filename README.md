@@ -25,9 +25,9 @@ var scheduler = new Scheduler({ host: 'localhost', port: 6379 });
 ```
 
 **#new Scheduler(options)**
-* options - Can be object or null. If null defaults to host: 'localhost' and port: 6579
-  * host - Redis connection host
-  * port - Redis connection port
+* options - Can be object or null. If null defaults to host: 'localhost' and port: 6579.
+  * host - Redis connection host.
+  * port - Redis connection port.
 
 ### Scheduling event
 
@@ -46,10 +46,10 @@ scheduler.schedule('test-key', expirationTime, eventTriggered, function (err) {
 ```
 
 **#schedule(key, expiration, triggerFn, cb)**
-* key - The key of event to store
-* expiration - Number of milliseconds until expiration
-* triggerFn - Function to call when scheduled time occurs
-* cb - Function to call after schedule set
+* key - The key of event to store.
+* expiration - Date/number of milliseconds until expiration.
+* triggerFn - Function to call when scheduled time occurs.
+* cb - Function to call after schedule set.
 
 ### Adding event handler
 
@@ -62,8 +62,8 @@ scheduler.addHandler('test-key', function () {
 ```
 
 **#addHandler(key, fn)**
-* key - The event key to add the handler for
-* fn - The extra handler to add when the event is triggered
+* key - The event key to add the handler for.
+* fn - The extra handler to add when the event is triggered.
 
 ###Rescheduling an Event###
 
@@ -76,9 +76,9 @@ scheduler.reschedule('test-key', 3000, function () {
 ```
 
 **#reschedule(key, expiration, cb)**
-* key - Event to reschedule
-* expiration - Milliseconds to reset expiration to
-* cb - Function to call after rescheduling is complete
+* key - Event to reschedule.
+* expiration - Milliseconds/date to reset expiration to.
+* cb - Function to call after rescheduling is complete.
 
 ###Cancel scheduled item###
 
