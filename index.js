@@ -1,6 +1,35 @@
 var events = require('events');
+var Joi = require('joi');
 var redis = require('redis');
 var util = require('util');
+
+var functionValidations = {
+  constructor: Joi.object({
+    host: Joi.string().default('localhost'),
+    port: Joi.number().integer().default(6379)
+  }).default({
+    host: 'localhost',
+    port: 6379
+  }),
+  schedule: Joi.object({
+    key: Joi.string().required(),
+    handler: Joi.func().optional(),
+    expire: Joi.date().optional(),
+    pattern: Joi.boolean().default(false)
+  }),
+  reschedule: Joi.object({
+    key: Joi.string().required(),
+    expire: Joi.date().required()
+  }),
+  addHandler: Joi.object({
+    key: Joi.string().required(),
+    handler: Joi.func().required(),
+    pattern: Joi.boolean().default(false)
+  }),
+  cancel: Joi.object({
+    key: Joi.string().required()
+  })
+};
 
 var Scheduler = function (options) {
   options = options || {};
@@ -12,6 +41,7 @@ var Scheduler = function (options) {
     listener: redis.createClient(port, host)
   };
   this.handlers = {};
+  this.patterns = {};
   this.setRedisEvents();
 
   events.EventEmitter.call(this);
@@ -55,41 +85,87 @@ Scheduler.prototype.setRedisEvents = function () {
   this.clients.listener.subscribe('__keyevent@0__:expired');
 };
 
-Scheduler.prototype.schedule = function (key, expire, handler, cb) {
-  if (handler) {
-    if (!this.handlers.hasOwnProperty(key)) {
-      this.handlers[key] = [];
+Scheduler.prototype.schedule = function (options, cb) {
+  var validations = functionValidations.schedule.validate(options);
+  if (validations.error) {
+    cb(validations.error);
+  } else {
+    if (options.handler) {
+      if (options.pattern) {
+        if (!this.patterns.hasOwnProperty(options.key)) {
+          this.patterns[options.key] = {
+            key: new RegExp(options.key),
+            handlers: []
+          };
+        }
+        this.patterns[options.key].handlers.push(options.handler);
+      } else {
+        if (!this.handlers.hasOwnProperty(options.key)) {
+          this.handlers[options.key] = [];
+        }
+        this.handlers[options.key].push(options.handler);
+      }
     }
-    this.handlers[key].push(handler);
+
+    if (options.expire) {
+      this.clients.scheduler.set(options.key, '', 'PX', this.getMillis(options.expire), cb);
+    }
+  }
+};
+
+Scheduler.prototype.reschedule = function (options, cb) {
+  var validations = functionValidations.reschedule.validate(options);
+  if (validations.error) {
+    cb(validations.error);
+  } else {
+    this.schedule(options, cb);
+  }
+};
+
+Scheduler.prototype.addHandler = function (options) {
+  var validations = functionValidations.addHandler.validate(options);
+  if (validations.error) {
+    throw validations.error;
+  } else {
+    this.schedule(options);
+  }
+};
+
+Scheduler.prototype.cancel = function (options, cb) {
+  var validations = functionValidations.cancel.validate(options);
+  if (validations.error) {
+    cb(validations.error);
+  } else {
+    var self = this;
+    this.clients.scheduler.del(options.key, function (err) {
+      delete(self.handlers[options.key]);
+      delete(self.patterns[options.key]);
+      cb(err);
+    });
   }
 
-  if (expire) {
-    this.clients.scheduler.set(key, '', 'PX', this.getMillis(expire), cb);
-  }
-};
-
-Scheduler.prototype.reschedule = function (key, expire, cb) {
-  this.schedule(key, expire, null, cb);
-};
-
-Scheduler.prototype.addHandler = function (key, handler) {
-  this.schedule(key, null, handler);
-};
-
-Scheduler.prototype.cancel = function (key, cb) {
-  var self = this;
-  this.clients.scheduler.del(key, function (err) {
-    delete(self.handlers[key]);
-    cb(err);
-  });
 };
 
 Scheduler.prototype.handleExpireEvent = function (key) {
+  this.checkForPatternMatches(key);
   if (this.handlers.hasOwnProperty(key)) {
     this.handlers[key].forEach(function (handler) {
       handler(null, key);
     });
   }
+};
+
+Scheduler.prototype.checkForPatternMatches = function (key) {
+  var handlersToSend = [];
+  for (var pattern in this.patterns) {
+    if (this.patterns[pattern].key.test(key)) {
+      handlersToSend = handlersToSend.concat(this.patterns[pattern].handlers);
+    }
+  }
+
+  handlersToSend.forEach(function (handler) {
+    handler(null, key);
+  });
 };
 
 Scheduler.prototype.end = function () {
