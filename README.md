@@ -1,7 +1,7 @@
 redis-scheduler
 ===============
 
-Use redis keyspace notifications to trigger timed events. 
+Use redis keyspace notifications to trigger timed events inspired by [http://blog.codezuki.com/blog/2013/07/07/redis-queue](http://blog.codezuki.com/blog/2013/07/07/redis-queue). 
 
 ## Features
 * Listen for expiring events by registering handlers to simple redis keys.
