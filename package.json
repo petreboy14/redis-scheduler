@@ -1,0 +1,33 @@
+{
+  "name": "redis-scheduler",
+  "version": "0.0.1",
+  "description": "Use redis keyspace notifications to trigger timed events",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/lab/bin/lab test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/petreboy14/redis-scheduler.git"
+  },
+  "keywords": [
+    "redis",
+    "event",
+    "queue",
+    "schedule"
+  ],
+  "author": "Peter Henning",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/petreboy14/redis-scheduler/issues"
+  },
+  "homepage": "https://github.com/petreboy14/redis-scheduler",
+  "dependencies": {
+    "redis": "^0.10.3"
+  },
+  "devDependencies": {
+    "jshint": "^2.5.1",
+    "lab": "^3.2.1",
+    "precommit-hook": "^1.0.2"
+  }
+}
