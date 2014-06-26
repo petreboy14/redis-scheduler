@@ -1,7 +1,13 @@
 redis-scheduler
 ===============
 
-Use redis keyspace notifications to trigger timed events. Multiple handlers can be set up per events and events can be rescheduled and cancelled. 
+Use redis keyspace notifications to trigger timed events. 
+
+## Features
+* Listen for expiring events by registering handlers to simple redis keys.
+* Multiple handlers can be set per key.
+* Events can be rescheduled or cancelled with automatic handler cleanup.
+* Can listen for patterns with one or many handlers using regular expressions.
 
 ## Requirements
 * Redis 2.8.0 or higher.
@@ -40,15 +46,16 @@ function eventTriggered(key) {
   console.log(key + ' triggered');
 }
 
-scheduler.schedule('test-key', expirationTime, eventTriggered, function (err) {
+scheduler.schedule({ key: 'test-key', expire: expirationTime, handler: eventTriggered }, function (err) {
   // Schedule set
 });
 ```
 
-**#schedule(key, expiration, triggerFn, cb)**
-* key - The key of event to store.
-* expiration - Date/number of milliseconds until expiration.
-* triggerFn - Function to call when scheduled time occurs.
+**#schedule(options, cb)**
+* options
+  * key (string) - The key of event to store.
+  * expire (date/number) - Date/number of milliseconds until expiration.
+  * handler (function) - Function to call when scheduled time occurs.
 * cb - Function to call after schedule set.
 
 ### Adding event handler
@@ -56,41 +63,46 @@ scheduler.schedule('test-key', expirationTime, eventTriggered, function (err) {
 You can add multiple handlers per event.
 
 ```
-scheduler.addHandler('test-key', function () {
+scheduler.addHandler({ key: 'test-key', handler: function () {
   console.log('another event');
-});
+}});
 ```
 
-**#addHandler(key, fn)**
-* key - The event key to add the handler for.
-* fn - The extra handler to add when the event is triggered.
+**#addHandler(options, fn)**
+* options
+  * key (string) - The event key to add the handler for (can be simple string or regex string in case of patterns).
+  * handler (function) - The extra handler to add when the event is triggered.
+  * pattern (boolean) - Designates whether key is a regular expression. 
 
 ###Rescheduling an Event###
 
 Reschedules a scheduled event. Will take either a new date to trigger or explicit milliseconds. 
 
 ```
-scheduler.reschedule('test-key', 3000, function () {
+scheduler.reschedule({ key: 'test-key', expire: 3000 }, function () {
   console.log('rescheduled');
 });
 ```
 
-**#reschedule(key, expiration, cb)**
-* key - Event to reschedule.
-* expiration - Milliseconds/date to reset expiration to.
-* cb - Function to call after rescheduling is complete.
+**#reschedule(options, cb)**
+* options
+  * key (string) - Event to reschedule.
+  * expire (number) - Milliseconds/date to reset expiration to.
+* cb (function) - Function to call after rescheduling is complete.
 
 ###Cancel scheduled item###
 
 Cancels a scheduled event and cleans up handlers
 
 ```
-scheduler.cancel('test-key');
+scheduler.cancel({ key: 'test-key' });
 ```
 
-**#cancel(key)**
-* key - Key to remove event for
+**#cancel(options)**
+* options
+  * key (string) - Key to remove event for. If a regular expression will cancel all pattern matching handlers.
 
+###A event pattern matching
 ###Close scheduler###
 
 Disconnects and closes all connections to redis and cleans up all existing event handlers
