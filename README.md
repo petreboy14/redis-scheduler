@@ -23,9 +23,11 @@ Create a new scheduler instance
 var Scheduler = require('redis-scheduler');
 var scheduler = new Scheduler({ host: 'localhost', port: 6379 });
 ```
-** Options **
-* host - Redis connection host
-* port - Redis connection port
+
+**#new Scheduler(options)**
+* options - Can be object or null. If null defaults to host: 'localhost' and port: 6579
+  * host - Redis connection host
+  * port - Redis connection port
 
 ### Scheduling event
 
