@@ -91,6 +91,12 @@ scheduler.cancel('test-key');
 **#cancel(key)**
 * key - Key to remove event for
 
+###Close scheduler###
+
+Disconnects and closes all connections to redis and cleans up all existing event handlers
+
+***#end()***
+
 ## Testing
 
 Clone the repo and run from the project root:
