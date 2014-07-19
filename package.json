@@ -24,7 +24,7 @@
   "homepage": "https://github.com/petreboy14/redis-scheduler",
   "dependencies": {
     "joi": "^4.6.1",
-    "redis": "^0.10.3"
+    "redis": "0.11.0"
   },
   "devDependencies": {
     "jshint": "^2.5.1",
