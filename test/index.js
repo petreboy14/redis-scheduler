@@ -1,9 +1,12 @@
+'use strict';
+
 var Lab = require('lab');
+var lab = exports.lab = Lab.script();
 var should = require('should');
 var redis = require('redis');
 
-var describe = Lab.experiment;
-var it = Lab.test;
+var describe = lab.experiment;
+var it = lab.test;
 
 var Scheduler = require('../index');
 

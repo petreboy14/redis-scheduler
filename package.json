@@ -24,15 +24,15 @@
   "homepage": "https://github.com/petreboy14/redis-scheduler",
   "dependencies": {
     "joi": "^4.6.1",
-    "redis": "0.11.0"
+    "redis": "0.12.1"
   },
   "devDependencies": {
     "jshint": "^2.5.1",
-    "lab": "^3.2.1",
+    "lab": "^5.2.1",
     "precommit-hook": "^1.0.2",
     "should": "^4.0.4"
   },
   "optionalDependencies": {
-    "hiredis": "^0.1.17"
+    "hiredis": "0.2.0"
   }
 }
