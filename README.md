@@ -42,7 +42,7 @@ Add a timed event.
 ```
 var expirationTime = 1000;
 
-function eventTriggered(key) {
+function eventTriggered(err, key) {
   console.log(key + ' triggered');
 }
 
