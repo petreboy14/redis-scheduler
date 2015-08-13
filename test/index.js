@@ -4,13 +4,38 @@ var Lab = require('lab');
 var lab = exports.lab = Lab.script();
 var should = require('should');
 var redis = require('redis');
+var sinon = require('sinon');
 
 var describe = lab.experiment;
 var it = lab.test;
+var beforeEach = lab.beforeEach;
+var afterEach = lab.afterEach;
 
 var Scheduler = require('../index');
 
+var redisClientStub = {
+  on: function () {},
+  auth: function () {},
+  select: function () {},
+  removeAllListeners: function () {},
+  subscribe: function () {},
+  unsubscribe: function () {},
+  end: function () {}
+};
+
 describe('Scheduler tests', function () {
+  var sandbox;
+
+  beforeEach(function (done) {
+    sandbox = sinon.sandbox.create();
+    done();
+  });
+
+  afterEach(function (done) {
+    sandbox.restore();
+    done();
+  });
+
   it('should be a valid constructor', function (done) {
     should.exist(Scheduler);
     Scheduler.should.be.an.instanceOf(Function);
@@ -31,6 +56,45 @@ describe('Scheduler tests', function () {
     should.exist(scheduler.clients);
     should.exist(scheduler.clients.listener);
     should.exist(scheduler.clients.scheduler);
+    scheduler.end();
+    done();
+  });
+
+  it('should be able to create a scheduler with a path', function (done) {
+    var scheduler = new Scheduler({ path: '/var/run/redis.pid'});
+    should.exist(scheduler.clients);
+    should.exist(scheduler.clients.listener);
+    should.exist(scheduler.clients.scheduler);
+    scheduler.end();
+    done();
+  });
+
+  it('should be able to create a scheduler with a password', function (done) {
+    sandbox.spy(redisClientStub, 'auth');
+    sandbox.stub(redis, 'createClient').returns(redisClientStub);
+    var scheduler = new Scheduler({ host: 'localhost', port: 6379, password: 'secret'});
+    redisClientStub.auth.calledTwice.should.be.true();
+    redisClientStub.auth.alwaysCalledWith('secret').should.be.true();
+    scheduler.end();
+    done();
+  });
+
+  it('should be able to create a scheduler with a db', function (done) {
+    sandbox.spy(redisClientStub, 'select');
+    sandbox.stub(redis, 'createClient').returns(redisClientStub);
+    var scheduler = new Scheduler({ host: 'localhost', port: 6379, db: 2});
+    scheduler.db.should.be.equal(2);
+    redisClientStub.select.calledTwice.should.be.true();
+    redisClientStub.select.alwaysCalledWith(2).should.be.true();
+    scheduler.end();
+    done();
+  });
+
+  it('should be able to create a scheduler with a redisOptions', function (done) {
+    sandbox.spy(redis, 'createClient');
+    var redisOptions = { detect_buffers: true};
+    var scheduler = new Scheduler({ host: 'localhost', port: 6379, redisOptions: redisOptions});
+    redis.createClient.alwaysCalledWith(6379, 'localhost', redisOptions).should.be.true();
     scheduler.end();
     done();
   });
