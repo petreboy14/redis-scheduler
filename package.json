@@ -30,7 +30,8 @@
     "jshint": "^2.5.1",
     "lab": "^5.2.1",
     "precommit-hook": "^1.0.2",
-    "should": "^4.0.4"
+    "should": "^7.0.3",
+    "sinon": "^1.15.4"
   },
   "optionalDependencies": {
     "hiredis": "0.2.0"

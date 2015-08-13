@@ -6,10 +6,14 @@ var util = require('util');
 var functionValidations = {
   constructor: Joi.object({
     host: Joi.string().default('localhost'),
-    port: Joi.number().integer().default(6379)
+    port: Joi.number().integer().default(6379),
+    db: Joi.number().integer().default(0),
+    password: Joi.string().optional(),
+    path: Joi.string().optional()
   }).default({
     host: 'localhost',
-    port: 6379
+    port: 6379,
+    db: 0
   }),
   schedule: Joi.object({
     key: Joi.string().required(),
@@ -31,14 +35,39 @@ var functionValidations = {
   })
 };
 
-var Scheduler = function (options) {
-  options = options || {};
+var createRedisClient = function (options) {
+  var redisClient;
   var host = options.host || 'localhost';
   var port = options.port || 6379;
+  var path = options.path;
+  var redisOptions = options.redisOptions;
+  var db = options.db;
+  var password = options.password;
 
+  if (path) {
+    redisClient = redis.createClient(path, redisOptions);
+  } else {
+    redisClient = redis.createClient(port, host, redisOptions);
+  }
+  
+  if (password) {
+    redisClient.auth(password);
+  }
+
+  if (db) {
+    redisClient.select(db);
+  }
+
+  return redisClient;
+};
+
+var Scheduler = function (options) {
+  options = options || {};
+
+  this.db = options.db || 0;
   this.clients = {
-    scheduler: redis.createClient(port, host),
-    listener: redis.createClient(port, host)
+    scheduler: createRedisClient(options),
+    listener: createRedisClient(options)
   };
   this.handlers = {};
   this.patterns = {};
@@ -82,7 +111,7 @@ Scheduler.prototype.setRedisEvents = function () {
     self.handleExpireEvent(message);
   });
 
-  this.clients.listener.subscribe('__keyevent@0__:expired');
+  this.clients.listener.subscribe('__keyevent@' + this.db + '__:expired');
 };
 
 Scheduler.prototype.schedule = function (options, cb) {
@@ -187,7 +216,7 @@ Scheduler.prototype.cleanup = function () {
   this.clients.listener.removeAllListeners();
   this.clients.scheduler.removeAllListeners();
 
-  this.clients.listener.unsubscribe('__keyevent@0__:expired');
+  this.clients.listener.unsubscribe('__keyevent@' + this.db + '__:expired');
   this.handlers = [];
 };
 
