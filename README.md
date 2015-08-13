@@ -31,9 +31,13 @@ var scheduler = new Scheduler({ host: 'localhost', port: 6379 });
 ```
 
 **#new Scheduler(options)**
-* options - Can be object or null. If null defaults to host: 'localhost' and port: 6579.
-  * host - Redis connection host.
-  * port - Redis connection port.
+* options - Can be object or null. If null defaults to host: 'localhost', port: 6579 and db: 0
+  * host (string) - Redis connection host.
+  * port (number) - Redis connection port.
+  * db (number) - Redis zero-based numeric database index
+  * path (string) - Redis pid file
+  * password (string) - Redis password
+  * redisOptions (object) - Redis options
 
 ### Scheduling event
 
@@ -42,7 +46,7 @@ Add a timed event.
 ```
 var expirationTime = 1000;
 
-function eventTriggered(key) {
+function eventTriggered(err, key) {
   console.log(key + ' triggered');
 }
 
