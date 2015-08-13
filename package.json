@@ -4,7 +4,9 @@
   "description": "Use redis keyspace notifications to trigger timed events",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/lab/bin/lab -c -l test"
+    "test": "./node_modules/lab/bin/lab -c -l test",
+    "lint": "jshint .",
+    "validate": "npm ls"
   },
   "repository": {
     "type": "git",
@@ -23,17 +25,22 @@
   },
   "homepage": "https://github.com/petreboy14/redis-scheduler",
   "dependencies": {
-    "joi": "^4.6.1",
+    "joi": "^6.6.1",
     "redis": "0.12.1"
   },
   "devDependencies": {
-    "jshint": "^2.5.1",
-    "lab": "^5.2.1",
-    "precommit-hook": "^1.0.2",
+    "jshint": "^2.8.0",
+    "lab": "^5.15.1",
+    "precommit-hook": "^3.0.0",
     "should": "^7.0.3",
     "sinon": "^1.15.4"
   },
   "optionalDependencies": {
-    "hiredis": "0.2.0"
-  }
+    "hiredis": "0.4.0"
+  },
+  "pre-commit": [
+    "lint",
+    "validate",
+    "test"
+  ]
 }
