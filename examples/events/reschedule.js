@@ -10,7 +10,7 @@ var eventTriggered = function (err, key) {
 
 // we create key 'reschedule' with period of expire equal 3000 ms and create handler with callback 'eventTriggered'
 scheduler.schedule({ key: 'reschedule', expire: 3000, handler: eventTriggered }, function (err) {
-  console.log(err || 'add keyword after 3000 ms');
+  console.log(err || 'add keyword with period of expire equal 3000 ms');
 });
 // we change period of expire to 5000 ms
 scheduler.reschedule({ key: 'reschedule', expire: 5000 }, function () {
