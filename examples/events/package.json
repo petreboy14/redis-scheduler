@@ -1,9 +1,0 @@
-{
-  "name": "redis-scheduler-example",
-  "version": "0.0.1",
-  "description": "examples for redis-sheduler",
-  "main": "app.js",
-  "dependencies": {
-    "redis-scheduler": "petreboy14/redis-scheduler#2d8316d"
-  }
-}
