@@ -99,7 +99,9 @@ scheduler.reschedule({ key: 'test-key', expire: 3000 }, function () {
 Cancels a scheduled event and cleans up handlers
 
 ```
-scheduler.cancel({ key: 'test-key' });
+scheduler.cancel({ key: 'test-key' }, function () {
+  console.log('canceled');
+});
 ```
 
 **#cancel(options)**
@@ -120,4 +122,15 @@ Clone the repo and run from the project root:
 ```
 $ npm install
 $ npm test
+```
+
+## Examples
+
+```
+$ cd examples/events
+$ npm install
+$ node simple.js
+$ node multi-handlers.js
+$ node loop.js
+$ node reschedule.js
 ```
