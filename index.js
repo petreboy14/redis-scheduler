@@ -139,10 +139,11 @@ Scheduler.prototype.schedule = function (options, cb) {
     if (options.expire) {
       var self = this;
       this.clients.scheduler.exists(options.key, function (err, exists) {
-        if (exists)
+        if (exists) {
           self.clients.scheduler.pexpire(options.key, options.expire, cb);
-        else
-          this.clients.scheduler.set(options.key, '', 'PX', this.getMillis(options.expire), cb);
+        } else {
+          self.clients.scheduler.set(options.key, '', 'PX', self.getMillis(options.expire), cb);
+        }
       });
     }
   }
