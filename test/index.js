@@ -134,8 +134,32 @@ describe('Scheduler tests', function () {
       scheduler.end();
       client.del('test-job');
       done();
-    }});
-    scheduler.reschedule({ key: 'test-job', expire: 500 });
+    }}, function (err) {
+      should.not.exist(err);
+      scheduler.reschedule({ key: 'test-job', expire: 500 });
+    });
+  });
+
+  it('should be able to handle a reschedule of an event with datetime', function (done) {
+    var client = redis.createClient();
+    var timeout = setTimeout(function () {
+      throw new Error('shouldnt be here');
+    }, 1200);
+
+    var scheduler = new Scheduler({ host: 'localhost', port: 6379});
+    scheduler.schedule({ key: 'test-job', expire: new Date(Date.now() + 1000), handler: function (err, message) {
+      clearTimeout(timeout);
+      should.not.exist(err);
+      message.should.equal('test-job');
+      scheduler.end();
+      client.del('test-job');
+      done();
+    }}, function (err) {
+      should.not.exist(err);
+      scheduler.reschedule({ key: 'test-job', expire: new Date(Date.now() + 500) }, function (err) {
+        should.not.exist(err);
+      });
+    });
   });
 
   it('should be able to cancel an event', function (done) {
